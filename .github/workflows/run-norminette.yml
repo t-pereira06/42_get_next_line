@@ -1,0 +1,25 @@
+name: Run Norminette Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  norminette:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull Docker Image from GHCR
+        run: docker pull ghcr.io/t-pereira06/ubuntu-norminette:latest
+
+      - name: Run Norminette inside Container
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app/get_next_line ghcr.io/t-pereira06/ubuntu-norminette:latest norminette /app/get_next_line || exit 1
